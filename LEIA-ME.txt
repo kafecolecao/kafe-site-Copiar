@@ -1,0 +1,26 @@
+KAFE COLEÇÃO - SITE COMPLETO (loja + painel administrativo)
+
+ARQUIVOS
+  index.html ........ loja (catálogo, sacola, Pix, minha conta)
+  style.css ......... visual da loja
+  admin.html/.css/.js  painel administrativo novo
+  config.js ......... chaves do Supabase, WhatsApp, Pix e Instagram (PREENCHER)
+  logo.png .......... logo redonda da Kafe
+  sql/ .............. scripts do banco de dados
+
+SE O SITE JÁ ESTÁ NO AR
+  1. Supabase > SQL Editor: rode APENAS sql/3-atualizar-admin.sql
+     (os dois primeiros já devem ter sido rodados)
+  2. GitHub: suba admin.html, admin.css e admin.js (substitui o antigo)
+  3. NÃO substitua o config.js (o seu já tem as chaves)
+  4. Abra /admin.html e aperte Ctrl+F5
+
+SE FOR INSTALAR DO ZERO
+  1. Crie um projeto no supabase.com
+  2. SQL Editor: rode, nesta ordem, sql/1-schema.sql, sql/2-comprovantes.sql e sql/3-atualizar-admin.sql
+  3. Project Settings > API: copie a Project URL e a anon public key para o config.js
+  4. Authentication > Users > Add user: crie seu e-mail e senha
+  5. SQL Editor, para virar administradora (troque o e-mail):
+       insert into admins(user_id) select id from auth.users where email = 'SEU@EMAIL.COM';
+  6. Suba todos os arquivos (menos a pasta sql) no GitHub e publique (Netlify, Vercel ou GitHub Pages)
+  7. Loja: seusite.com   |   Painel: seusite.com/admin.html

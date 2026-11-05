@@ -1,0 +1,92 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kafe Coleção · Sandálias e moda feminina</title>
+<link rel="icon" type="image/png" href="logo.png">
+<meta name="theme-color" content="#f1ebdf">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"><style>
+.cta{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin:1.2rem 0 .2rem}
+.cta .btn,.fab,.foot a{text-decoration:none}
+.cta .btn{display:inline-flex;align-items:center;gap:.45rem}
+.strip{display:flex;gap:.3rem 1.3rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;font-size:.78rem;color:var(--mut)}
+.how{max-width:1100px;margin:2.6rem auto 0;padding:0 1rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.how div{background:#fff;border-radius:10px;padding:1.1rem 1rem;text-align:center;font-size:.85rem;color:var(--mut)}
+.how b{display:grid;place-items:center;width:36px;height:36px;margin:0 auto .55rem;border-radius:50%;background:var(--pink);color:var(--rose);font:600 1.2rem 'Cormorant Garamond',serif}
+.how span{display:block;color:var(--ink);font-weight:500;margin-bottom:.15rem}
+.foot{margin-top:3rem;background:var(--pink);padding:2.4rem 1.2rem 5.5rem;text-align:center}
+.foot .logo{display:inline-flex;flex-direction:column;gap:.7rem;text-align:center}.foot .logo img{width:84px;height:84px}.foot .logo small{margin-top:6px}
+.foot .tag{font:italic 500 1.25rem 'Cormorant Garamond',serif;color:var(--rose);margin:.8rem 0 1.2rem}
+.foot .ct{display:flex;flex-direction:column;gap:.45rem;align-items:center;font-size:.9rem}
+.foot .ct a{color:var(--ink)}.foot .ct a:hover{color:var(--rose)}
+.foot .sm{margin-top:1.4rem;font-size:.74rem;color:var(--mut)}
+.strip span::before,.foot .ct span::before{content:'◆';font-size:.5rem;color:var(--rose);margin-right:.5rem;vertical-align:middle}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:20}
+.fab svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:600px){.how{grid-template-columns:1fr}}
+</style>
+</head><body>
+<header><div class="logo"><img src="logo.png" alt="Kafe Coleção"><span>KAFE<small>COLEÇÃO</small></span></div><div><button class="btn o sm" onclick="acct()">Minha conta</button> <button class="btn sm" onclick="bag()">Sacola (<span id="n">0</span>)</button></div></header>
+<div class="hero"><h1>Elegância em cada detalhe</h1><p class="m">Sandálias &amp; moda feminina que combinam com você</p>
+<div class="cta"><a class="btn r" id="hwa" target="_blank" rel="noopener">Chamar no WhatsApp</a><a class="btn o" id="hig" target="_blank" rel="noopener">Instagram</a></div>
+<div class="strip"><span>Araguaína · TO</span><span>Enviamos para todo o Brasil</span><span>Pagamento via Pix</span></div></div>
+<div class="wrap"><div class="tabs" id="tb"><button class="on">Todos</button><button>Sandálias</button><button>Roupas</button></div><div class="grid" id="g"></div></div>
+<section class="how"><div><b>1</b><span>Escolha seu par</span>Veja os modelos e selecione o seu tamanho</div><div><b>2</b><span>Pague com Pix</span>Finalize o pedido e pague pelo QR code</div><div><b>3</b><span>Envie o comprovante</span>Mandamos tudo pelo WhatsApp e cuidamos do envio</div></section>
+<footer class="foot"><div class="logo"><img src="logo.png" alt="Kafe Coleção"><span>KAFE<small>COLEÇÃO</small></span></div>
+<p class="tag">Elegância em cada detalhe</p>
+<div class="ct"><a id="fwa" target="_blank" rel="noopener"></a><a id="fig" target="_blank" rel="noopener"></a><span>Araguaína · TO</span><span>Enviamos para todo o Brasil</span></div>
+<p class="sm">© <span id="yr"></span> Kafe Coleção · Todos os direitos reservados</p></footer>
+<a class="fab" id="fab" target="_blank" rel="noopener" aria-label="Falar no WhatsApp"><svg viewBox="0 0 24 24"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/></svg></a>
+<dialog id="dlg"><div id="d"></div></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script>
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=s=>document.querySelector(s);
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const R=n=>Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+let P=[],sel,cat='Todos',PO,cart=JSON.parse(localStorage.cart||'[]');
+const save=()=>{localStorage.cart=JSON.stringify(cart);$('#n').textContent=cart.reduce((a,i)=>a+i.qty,0)};
+const modal=h=>{$('#d').innerHTML=h;$('#dlg').open||$('#dlg').showModal()};
+$('#tb').onclick=ev=>{if(ev.target.tagName!='BUTTON')return;cat=ev.target.textContent;document.querySelectorAll('#tb button').forEach(b=>b.classList.toggle('on',b==ev.target));show()};
+const sizeCmp=(a,b)=>{const O=['PP','P','M','G','GG','XG','XGG','Único'],x=parseFloat(a),y=parseFloat(b);if(!isNaN(x)&&!isNaN(y))return x-y;const i=O.indexOf(a),j=O.indexOf(b);if(i>-1&&j>-1)return i-j;if(!isNaN(x))return-1;if(!isNaN(y))return 1;return String(a).localeCompare(String(b),'pt-BR')};
+function tabs(){const c=[...new Set(P.map(p=>p.category).filter(Boolean))];if(!c.length)return;if(!c.includes(cat))cat='Todos';$('#tb').innerHTML=['Todos',...c].map(x=>`<button class="${x==cat?'on':''}">${e(x)}</button>`).join('')}
+async function load(){const{data}=await sb.from('products').select('*,variants(size,stock)').eq('active',true).order('created_at',{ascending:false});P=data||[];tabs();show()}
+function show(){const L=P.filter(p=>cat=='Todos'||p.category==cat);
+$('#g').innerHTML=L.map(p=>`<div class=card onclick="one('${p.id}')"><img src="${e(p.image_url)}" alt="${e(p.name)}"><div class=pi><h3>${e(p.name)}</h3><b>${R(p.price)}</b></div></div>`).join('')||'<p class=m>Novidades em breve.</p>'}
+function one(id){const p=P.find(x=>x.id==id);sel=null;
+modal(`<img class=big src="${e(p.image_url)}"><h2>${e(p.name)}</h2><p class=m>${e(p.description)}</p><h3>${R(p.price)}</h3><div class=sz>${p.variants.filter(v=>v.stock>0).sort((a,b)=>sizeCmp(a.size,b.size)).map(v=>`<button class=s onclick="pick(this,'${v.size}')">${v.size}</button>`).join('')||'<span class=m>Esgotado</span>'}</div><button class="btn r" onclick="add('${id}')">Adicionar à sacola</button> <button class="btn o" onclick="$('#dlg').close()">Fechar</button>`)}
+function pick(b,s){sel=s;document.querySelectorAll('.s').forEach(x=>x.classList.toggle('on',x==b))}
+function add(id){if(!sel)return alert('Escolha o tamanho');const p=P.find(x=>x.id==id),i=cart.find(c=>c.id==id&&c.size==sel);i?i.qty++:cart.push({id,size:sel,qty:1,name:p.name,price:p.price});save();bag()}
+function del(i){cart.splice(i,1);save();bag()}
+function bag(){const t=cart.reduce((a,i)=>a+i.price*i.qty,0);
+modal(`<h2>Sua sacola</h2>${cart.map((i,k)=>`<div class=row><span>${e(i.name)} · tam. ${i.size} · ${i.qty}x<br><b>${R(i.price*i.qty)}</b></span><button class="btn o sm" onclick="del(${k})">Remover</button></div>`).join('')||'<p class=m>Sacola vazia.</p>'}
+<h3 style="margin:.8rem 0">Total ${R(t)}</h3><label>Nome</label><input id=cn><label>WhatsApp</label><input id=ct type=tel><label>Endereço completo</label><textarea id=ca rows=2></textarea>
+<button class="btn r" onclick="fin()">Pedir e pagar com Pix</button> <button class="btn o" onclick="$('#dlg').close()">Continuar comprando</button>`)}
+async function fin(){const n=$('#cn').value,t=$('#ct').value,a=$('#ca').value;if(!n||!t||!a||!cart.length)return alert('Preencha seus dados.');
+const{data,error}=await sb.rpc('create_order',{p_name:n,p_phone:t,p_address:a,p_items:cart.map(i=>({product_id:i.id,size:i.size,qty:i.qty}))});
+if(error)return alert(error.message);
+PO={id:data,n,t,a,tot:cart.reduce((s,i)=>s+i.price*i.qty,0),items:cart.map(i=>`• ${i.name}\n    Tam. ${i.size} · ${i.qty}x · ${R(i.price*i.qty)}`).join('\n\n')};cart=[];save();pay()}
+const crc=s=>{let c=0xFFFF;for(const ch of s){c^=ch.charCodeAt(0)<<8;for(let j=0;j<8;j++)c=c&0x8000?(c<<1)^0x1021:c<<1;c&=0xFFFF}return c.toString(16).toUpperCase().padStart(4,'0')};
+const f=(id,v)=>id+String(v.length).padStart(2,'0')+v;
+function pixCode(amt,tx){const p=f('00','01')+f('26',f('00','br.gov.bcb.pix')+f('01',PIX_KEY))+f('52','0000')+f('53','986')+f('54',amt.toFixed(2))+f('58','BR')+f('59',PIX_NAME.slice(0,25))+f('60','Araguaina')+f('62',f('05',tx))+'6304';return p+crc(p)}
+function pay(){const code=pixCode(PO.tot,PO.id.replace(/-/g,'').slice(0,12));
+modal(`<h2>Pague com Pix</h2><p class=m>Pedido #${PO.id.slice(0,6)} criado. Pague <b>${R(PO.tot)}</b> e anexe o comprovante.</p><div id=qr style="display:flex;justify-content:center;margin:.6rem 0"></div><label>Pix copia e cola</label><textarea id=pc rows=3 readonly>${code}</textarea><button class="btn o" onclick="navigator.clipboard.writeText($('#pc').value);alert('Código copiado!')">Copiar código</button><p class=m>Chave Pix (celular): <b>${PIX_SHOW}</b><br>${PIX_NAME}</p><label>Comprovante (foto ou PDF)</label><input id=pf type=file accept="image/*,application/pdf"><button class="btn r" onclick="proof()">Enviar comprovante</button> <button class="btn o" onclick="wa('')">Vou pagar depois</button>`);
+new QRCode($('#qr'),{text:code,width:180,height:180})}
+async function proof(){const f=$('#pf').files[0];if(!f)return alert('Anexe o comprovante.');
+const path=PO.id+'-'+f.name.replace(/[^\w.]/g,'');const{error}=await sb.storage.from('comprovantes').upload(path,f);if(error)return alert(error.message);
+const url=sb.storage.from('comprovantes').getPublicUrl(path).data.publicUrl;await sb.rpc('attach_proof',{p_order:PO.id,p_url:url});wa(url)}
+function wa(url){const L='━━━━━━━━━━━━━━';
+const tx=`Olá, Kafe Coleção!\nAcabei de fazer um pedido pelo site.\n\n*PEDIDO #${PO.id.slice(0,6)}*\n${L}\n\n*ITENS*\n${PO.items}\n\n*TOTAL: ${R(PO.tot)}*\n${L}\n\n*MEUS DADOS*\nNome: ${PO.n}\nWhatsApp: ${PO.t}\nEndereço: ${PO.a}\n\n*PAGAMENTO · PIX*\n`+(url?`✔ Comprovante enviado:\n${url}`:`Vou pagar agora e envio o comprovante em seguida.`)+`\n\nObrigada!`;
+location.href=`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(tx)}`}
+async function acct(){const{data:{session}}=await sb.auth.getSession();
+if(!session)return modal(`<h2>Minha conta</h2><label>E-mail</label><input id=le type=email><label>Senha (mín. 6)</label><input id=lp type=password><button class="btn r" onclick="auth('in')">Entrar</button> <button class="btn o" onclick="auth('up')">Criar conta</button>`);
+const{data}=await sb.from('orders').select('*,order_items(*)').order('created_at',{ascending:false});
+modal(`<h2>Meus pedidos</h2>${(data||[]).map(o=>`<div class=row><span>#${o.id.slice(0,6)} · ${new Date(o.created_at).toLocaleDateString('pt-BR')}<br>${o.order_items.map(i=>e(i.name)+' '+i.size).join(', ')}</span><span><b>${R(o.total)}</b><br>${o.status}</span></div>`).join('')||'<p class=m>Nenhum pedido ainda.</p>'}<button class="btn o" onclick="sb.auth.signOut().then(()=>$('#dlg').close())">Sair</button> <button class="btn o" onclick="$('#dlg').close()">Fechar</button>`)}
+async function auth(k){const c={email:$('#le').value,password:$('#lp').value};const{error}=k=='in'?await sb.auth.signInWithPassword(c):await sb.auth.signUp(c);
+if(error)return alert(error.message);acct()}
+const IG=typeof INSTAGRAM!=='undefined'?INSTAGRAM:'kafe.colecao';
+function contact(){const d=String(WHATSAPP).replace(/^55/,''),tel=`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`,
+msg=encodeURIComponent('Olá! Vim pelo site da Kafe Coleção e gostaria de ajuda.'),wa=`https://wa.me/${WHATSAPP}?text=${msg}`,ig=`https://instagram.com/${IG}`;
+['hwa','fwa','fab'].forEach(i=>$('#'+i).href=wa);['hig','fig'].forEach(i=>$('#'+i).href=ig);
+$('#fwa').textContent='WhatsApp · '+tel;$('#fig').textContent='Instagram · @'+IG;$('#yr').textContent=new Date().getFullYear()}
+contact();save();load();
+</script></body></html>
